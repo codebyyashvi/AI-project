@@ -1,0 +1,6 @@
+Namespace(dataroot='./data/fs_static', dataset='static', num_classes=19, folder='./results/fishyscapes_static_test', params='./checkpoints/dlv3+_cityscapes_ade_negative_finetune.pth')
+> Loaded model.
+== DenseHybrid anomaly detection ==
+> Average precision: 70.23%
+> FPR: 3.33%
+> AUROC: 99.15%

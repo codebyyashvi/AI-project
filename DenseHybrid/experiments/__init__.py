@@ -1,0 +1,5 @@
+from .semseg import SemsegExperiment
+from .semseg_ft_flow_coco import SemsegFlowNegativesCOCOExperiment
+from .semseg_ft_negatives_coco import SemsegADENegativesCOCOExperiment
+from .semseg_ft_negatives_traffic import SemsegADENegativesTrafficExperiment
+from .semseg_ft_flow_traffic import SemsegFlowNegativesTrafficExperiment
