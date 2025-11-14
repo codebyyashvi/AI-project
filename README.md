@@ -75,15 +75,49 @@ data/
     'actorBkg': '#ffffff'
 }}}%%
 sequenceDiagram
-    participant U as User (Client)
-    participant M as DenseHybrid Model
-    participant E as OOD Evaluator
-    participant R as Result Logger
-    participant V as Visualizer
+    autonumber
 
-    U->>M: Provide dataset and pretrained weights
-    M->>E: Generate logits and OOD scores
-    E->>R: Compute metrics (AP, FPR, AUROC)
-    R-->>U: Display numerical results
-    E->>V: Generate visualization maps (segmentation, OOD, energy)
-    V-->>U: Save images to results folder
+    participant RS as Regular Scene (x⁺)
+    participant CROP as Crop Module
+    participant NF as Normalizing Flow
+    participant AUX as Auxiliary OOD Dataset
+    participant MIX as Mixed-Image Generator
+    participant FE as Feature Extractor
+    participant PROJ as Projection Head
+    participant LOSS as Loss Functions
+    participant GT as Ground Truth
+
+    %% Input
+    RS->>CROP: Select crop(x⁺), generate mask m
+
+    %% Synthetic / Real Negatives
+    CROP->>NF: Forward crop through flow (shared weights)
+    NF-->>CROP: Encoded crop features
+    NF->>MIX: Generate synthetic negative (z ~ N(0,I))
+
+    AUX->>MIX: Provide real negative patch (OOD sample)
+
+    %% Bernoulli choice
+    MIX->>MIX: Select synthetic or real patch (Σ ~ Bernoulli(b))
+
+    %% Mixed Content Image
+    CROP->>MIX: Provide mask m and spatial location
+    MIX->>MIX: Paste negative patch → x′ (mixed image)
+
+    %% Feature Extraction
+    MIX->>FE: Extract deep features from x′
+
+    %% Projection
+    FE->>PROJ: Project features → logits (ID + OOD)
+
+    %% Supervision
+    PROJ->>LOSS: L_d (segmentation loss)
+    PROJ->>LOSS: L_x (consistency loss)
+    PROJ->>LOSS: L_cla (ID vs OOD loss)
+    NF->>LOSS: L_mle + L_jed (flow losses)
+
+    %% Final Output
+    LOSS->>GT: Compare with segmentation ground truth
+ 
+```
+
